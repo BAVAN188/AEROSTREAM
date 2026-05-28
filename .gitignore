@@ -1,0 +1,18 @@
+# Raw datasets
+*.csv
+
+# Python cache
+__pycache__/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Environment files
+.env
+
+# Logs
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
