@@ -1,99 +1,102 @@
 import pandas as pd
-import os
+from pathlib import Path
 
-# =====================
-# STEP 1: LOAD ALL 4 MONTHS
-# =====================
 
-# List all CSV files in the ingestion folder
-# Each file is one month of flight data
-ingestion_path = 'C:/Users/bavan/AeroStream/ingestion/'
+def run():
 
-files = [
-    'T_ONTIME_REPORTING.csv',        # January
-    'T_ONTIME_REPORTING FEB.csv',    # February
-    'T_ONTIME_REPORTING MARCH.csv',  # March
-    'T_ONTIME_REPORTING APRIL.csv'   # April
-]
+    # =====================
+    # STEP 1: LOAD ALL 4 MONTHS
+    # =====================
 
-# Empty list to store each month's dataframe
-# Think of it like an empty box we'll fill with 4 tables
-all_months = []
+    project_root = Path(__file__).resolve().parents[1]
+    raw_dir = project_root / "data" / "raw"
+    cleaned_output_path = project_root / "data" / "processed" / "jfk_clean.csv"
 
-# Loop through each file, load it, add to the list
-for file in files:
-    path = ingestion_path + file
-    df_month = pd.read_csv(path)
-    print(f"Loaded {file}: {df_month.shape}")
-    all_months.append(df_month)
+    files = [
+        "T_ONTIME_REPORTING.csv",
+        "T_ONTIME_REPORTING FEB.csv",
+        "T_ONTIME_REPORTING MARCH.csv",
+        "T_ONTIME_REPORTING APRIL.csv",
+    ]
 
-# Combine all 4 months into one big dataframe
-# pd.concat() stacks dataframes on top of each other like stacking papers
-# ignore_index=True resets row numbers from 0 to end
-raw = pd.concat(all_months, ignore_index=True)
-print("\nAll months combined:", raw.shape)
+    all_months = []
 
-# =====================
-# STEP 2: FILTER TO JFK
-# =====================
+    for file in files:
+        path = raw_dir / file
+        df_month = pd.read_csv(path)
+        print(f"Loaded {file}: {df_month.shape}")
+        all_months.append(df_month)
 
-jfk = raw[raw['ORIGIN'] == 'JFK']
-print("JFK flights:", jfk.shape)
+    raw = pd.concat(all_months, ignore_index=True)
+    print("\nAll months combined:", raw.shape)
 
-# =====================
-# STEP 3: KEEP USEFUL COLUMNS
-# =====================
+    # =====================
+    # STEP 2: FILTER TO JFK
+    # =====================
 
-columns_we_need = [
-    'FL_DATE',
-    'OP_UNIQUE_CARRIER',
-    'ORIGIN',
-    'DEST',
-    'DEST_CITY_NAME',
-    'CRS_DEP_TIME',
-    'DEP_TIME',
-    'DEP_DELAY',
-    'ARR_DELAY',
-    'CANCELLED',
-    'CANCELLATION_CODE',
-    'CARRIER_DELAY',
-    'WEATHER_DELAY',
-    'NAS_DELAY',
-    'SECURITY_DELAY',
-    'LATE_AIRCRAFT_DELAY',
-    'DISTANCE'
-]
+    jfk = raw[raw["ORIGIN"] == "JFK"]
+    print("JFK flights:", jfk.shape)
 
-df = jfk[columns_we_need].copy()
-print("After column selection:", df.shape)
+    # =====================
+    # STEP 3: KEEP USEFUL COLUMNS
+    # =====================
 
-# =====================
-# STEP 4: CLEAN DATA
-# =====================
+    columns_we_need = [
+        "FL_DATE",
+        "OP_UNIQUE_CARRIER",
+        "ORIGIN",
+        "DEST",
+        "DEST_CITY_NAME",
+        "CRS_DEP_TIME",
+        "DEP_TIME",
+        "DEP_DELAY",
+        "ARR_DELAY",
+        "CANCELLED",
+        "CANCELLATION_CODE",
+        "CARRIER_DELAY",
+        "WEATHER_DELAY",
+        "NAS_DELAY",
+        "SECURITY_DELAY",
+        "LATE_AIRCRAFT_DELAY",
+        "DISTANCE",
+    ]
 
-df['FL_DATE'] = pd.to_datetime(df['FL_DATE'], format='mixed')
+    df = jfk[columns_we_need].copy()
+    print("After column selection:", df.shape)
 
-delay_columns = [
-    'CARRIER_DELAY',
-    'WEATHER_DELAY',
-    'NAS_DELAY',
-    'SECURITY_DELAY',
-    'LATE_AIRCRAFT_DELAY'
-]
+    # =====================
+    # STEP 4: CLEAN DATA
+    # =====================
 
-for col in delay_columns:
-    df[col] = df[col].fillna(0)
+    df["FL_DATE"] = pd.to_datetime(df["FL_DATE"], format="mixed")
 
-df['CANCELLATION_CODE'] = df['CANCELLATION_CODE'].fillna('N')
-df['DEP_DELAY'] = df['DEP_DELAY'].fillna(0)
-df['ARR_DELAY'] = df['ARR_DELAY'].fillna(0)
+    delay_columns = [
+        "CARRIER_DELAY",
+        "WEATHER_DELAY",
+        "NAS_DELAY",
+        "SECURITY_DELAY",
+        "LATE_AIRCRAFT_DELAY",
+    ]
 
-print("\nMissing values after cleaning:")
-print(df.isnull().sum())
+    for col in delay_columns:
+        df[col] = df[col].fillna(0)
 
-# =====================
-# STEP 5: SAVE CLEAN DATA
-# =====================
+    df["CANCELLATION_CODE"] = df["CANCELLATION_CODE"].fillna("N")
+    df["DEP_DELAY"] = df["DEP_DELAY"].fillna(0)
+    df["ARR_DELAY"] = df["ARR_DELAY"].fillna(0)
 
-df.to_csv('C:/Users/bavan/AeroStream/cleaning/jfk_clean.csv', index=False)
-print("\n✅ Clean data saved! Shape:", df.shape)
+    print("\nMissing values after cleaning:")
+    print(df.isnull().sum())
+
+    # =====================
+    # STEP 5: SAVE CLEAN DATA
+    # =====================
+
+    cleaned_output_path.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(cleaned_output_path, index=False)
+
+    print("\n✅ Clean data saved! Shape:", df.shape)
+
+
+if __name__ == "__main__":
+    run()

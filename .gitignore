@@ -1,18 +1,20 @@
 # Raw datasets
 *.csv
 
+# Python virtual environment
+.venv/
+
 # Python cache
 __pycache__/
+*.py[cod]
 
-# Jupyter checkpoints
-.ipynb_checkpoints/
-
-# Environment files
+# Environment variables
 .env
 
 # Logs
 logs/
+*.log
 
-# OS files
+# macOS / Windows
 .DS_Store
 Thumbs.db
