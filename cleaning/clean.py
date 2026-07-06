@@ -1,45 +1,58 @@
 import pandas as pd
 from pathlib import Path
 
+# =====================================================
+# CONFIGURATION
+# =====================================================
+
+# None = Process all airports
+# "JFK" = Only JFK
+# "LAX" = Only LAX
+# etc.
+
+AIRPORT_FILTER = None
+
 
 def run():
 
-    # =====================
-    # STEP 1: LOAD ALL 4 MONTHS
-    # =====================
+    # =====================================================
+    # STEP 1: LOAD ALL CSV FILES
+    # =====================================================
 
     project_root = Path(__file__).resolve().parents[1]
     raw_dir = project_root / "data" / "raw"
-    cleaned_output_path = project_root / "data" / "processed" / "jfk_clean.csv"
+    cleaned_output_path = project_root / "data" / "processed" / "clean_flights.csv"
 
-    files = [
-        "T_ONTIME_REPORTING.csv",
-        "T_ONTIME_REPORTING FEB.csv",
-        "T_ONTIME_REPORTING MARCH.csv",
-        "T_ONTIME_REPORTING APRIL.csv",
-    ]
+    csv_files = sorted(raw_dir.glob("*.csv"))
+
+    if not csv_files:
+        raise FileNotFoundError("❌ No CSV files found inside data/raw")
 
     all_months = []
 
-    for file in files:
-        path = raw_dir / file
-        df_month = pd.read_csv(path)
-        print(f"Loaded {file}: {df_month.shape}")
+    for file in csv_files:
+        df_month = pd.read_csv(file)
+        print(f"Loaded {file.name}: {df_month.shape}")
         all_months.append(df_month)
 
     raw = pd.concat(all_months, ignore_index=True)
-    print("\nAll months combined:", raw.shape)
 
-    # =====================
-    # STEP 2: FILTER TO JFK
-    # =====================
+    print(f"\nCombined Dataset Shape: {raw.shape}")
 
-    jfk = raw[raw["ORIGIN"] == "JFK"]
-    print("JFK flights:", jfk.shape)
+    # =====================================================
+    # STEP 2: FILTER AIRPORT (OPTIONAL)
+    # =====================================================
 
-    # =====================
-    # STEP 3: KEEP USEFUL COLUMNS
-    # =====================
+    if AIRPORT_FILTER:
+        filtered = raw[raw["ORIGIN"] == AIRPORT_FILTER]
+        print(f"{AIRPORT_FILTER} flights: {filtered.shape}")
+    else:
+        filtered = raw
+        print(f"Processing ALL airports: {filtered.shape}")
+
+    # =====================================================
+    # STEP 3: KEEP REQUIRED COLUMNS
+    # =====================================================
 
     columns_we_need = [
         "FL_DATE",
@@ -61,12 +74,13 @@ def run():
         "DISTANCE",
     ]
 
-    df = jfk[columns_we_need].copy()
-    print("After column selection:", df.shape)
+    df = filtered[columns_we_need].copy()
 
-    # =====================
+    print(f"After column selection: {df.shape}")
+
+    # =====================================================
     # STEP 4: CLEAN DATA
-    # =====================
+    # =====================================================
 
     df["FL_DATE"] = pd.to_datetime(df["FL_DATE"], format="mixed")
 
@@ -86,16 +100,19 @@ def run():
     df["ARR_DELAY"] = df["ARR_DELAY"].fillna(0)
 
     print("\nMissing values after cleaning:")
+
     print(df.isnull().sum())
 
-    # =====================
+    # =====================================================
     # STEP 5: SAVE CLEAN DATA
-    # =====================
+    # =====================================================
 
     cleaned_output_path.parent.mkdir(parents=True, exist_ok=True)
+
     df.to_csv(cleaned_output_path, index=False)
 
-    print("\n✅ Clean data saved! Shape:", df.shape)
+    print(f"\n✅ Clean data saved to: {cleaned_output_path}")
+    print(f"Final Shape: {df.shape}")
 
 
 if __name__ == "__main__":

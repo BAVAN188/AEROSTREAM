@@ -13,7 +13,7 @@ def run():
         print("✅ Connected to PostgreSQL successfully!")
 
     project_root = Path(__file__).resolve().parents[1]
-    cleaned_file = project_root / "data" / "processed" / "jfk_clean.csv"
+    cleaned_file = project_root / "data" / "processed" / "clean_flights.csv"
 
     df = pd.read_csv(cleaned_file)
     print("Clean data loaded:", df.shape)
@@ -44,21 +44,33 @@ def run():
 
     print("✅ dim_airline loaded!")
 
-    # =====================
+        # =====================
     # DIM_AIRPORT
     # =====================
 
+    # Origin airports
+    origin_airports = df[["ORIGIN"]].copy()
+    origin_airports.columns = ["airport_code"]
+    origin_airports["city_name"] = None
+
+    # Destination airports
+    dest_airports = df[["DEST", "DEST_CITY_NAME"]].copy()
+    dest_airports.columns = ["airport_code", "city_name"]
+
+    # Combine origin + destination airports
+    dim_airport = pd.concat(
+        [origin_airports, dest_airports],
+        ignore_index=True
+    )
+
+    # Remove duplicates
     dim_airport = (
-        df[["DEST", "DEST_CITY_NAME"]]
-        .drop_duplicates()
+        dim_airport
+        .drop_duplicates(subset=["airport_code"])
         .reset_index(drop=True)
     )
 
-    dim_airport = dim_airport.rename(columns={
-        "DEST": "airport_code",
-        "DEST_CITY_NAME": "city_name"
-    })
-
+    # Add IDs
     dim_airport.insert(
         0,
         "airport_id",
@@ -77,6 +89,8 @@ def run():
     )
 
     print("✅ dim_airport loaded!")
+
+    
 
     # =====================
     # DIM_TIME
