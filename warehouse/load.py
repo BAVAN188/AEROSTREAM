@@ -44,7 +44,10 @@ def run():
 
     print("✅ dim_airline loaded!")
 
-        # =====================
+
+    
+
+    # =====================
     # DIM_AIRPORT
     # =====================
 
@@ -81,6 +84,45 @@ def run():
 
     print("\nAirports to load:", len(dim_airport))
 
+    airport_master = pd.read_csv(
+        project_root / "data" / "raw" / "airports.csv"
+    )
+
+    airport_master = airport_master[
+        [
+            "iata_code",
+            "name",
+            "municipality",
+            "latitude_deg",
+            "longitude_deg",
+        ]
+    ].dropna(subset=["iata_code"])
+
+    dim_airport = dim_airport.merge(
+        airport_master,
+        left_on="airport_code",
+        right_on="iata_code",
+        how="left"
+    )
+
+    dim_airport["city_name"] = dim_airport["city_name"].fillna(
+        dim_airport["municipality"]
+    )
+
+    dim_airport.rename(
+        columns={
+            "name": "airport_name",
+            "latitude_deg": "latitude",
+            "longitude_deg": "longitude",
+        },
+        inplace=True
+    )
+
+    dim_airport.drop(
+        columns=["iata_code", "municipality"],
+        inplace=True
+    )
+    
     dim_airport.to_sql(
         "dim_airport",
         con=engine,
@@ -123,6 +165,35 @@ def run():
     )
 
     print("✅ dim_time loaded!")
+
+    # =====================
+    # DIM_WEATHER
+    # =====================
+
+    weather_file = (
+        project_root / "data" / "processed" / "weather_final.csv"
+    )
+
+    weather = pd.read_csv(weather_file)
+
+    weather["date"] = pd.to_datetime(weather["date"])
+
+    weather.insert(
+        0,
+        "weather_id",
+        range(1, len(weather) + 1)
+    )
+
+    print("\nWeather rows to load:", len(weather))
+
+    weather.to_sql(
+        "dim_weather",
+        con=engine,
+        if_exists="replace",
+        index=False
+    )
+
+    print("✅ dim_weather loaded!")
 
     # =====================
     # READ DIMENSION TABLES
@@ -184,9 +255,11 @@ def run():
     # BUILD FACT TABLE
     # =====================
 
+    
     fact_final = fact[
         [
             "date_id",
+            "FL_DATE",
             "airline_id",
             "airport_id",
             "ORIGIN",
@@ -205,6 +278,7 @@ def run():
     ].copy()
 
     fact_final = fact_final.rename(columns={
+        "FL_DATE": "flight_date",
         "airport_id": "dest_id",
         "ORIGIN": "origin",
         "DEST": "dest",
