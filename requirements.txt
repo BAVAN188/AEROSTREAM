@@ -1,8 +1,8 @@
 streamlit
+streamlit-option-menu
 pandas
 plotly
 sqlalchemy
 psycopg2-binary
 python-dotenv
 numpy
-python-dotenv
