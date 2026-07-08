@@ -1,6 +1,6 @@
 # ✈️ AeroStream
 
-::: {align="center"}
+
 # Enterprise Flight Operations Analytics Platform
 
 **End-to-End Data Engineering \| PostgreSQL Data Warehouse \| Streamlit
