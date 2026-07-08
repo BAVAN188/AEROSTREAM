@@ -1,114 +1,168 @@
 # ✈️ AeroStream
 
-> **Enterprise Flight Operations Analytics Platform**
+::: {align="center"}
+# Enterprise Flight Operations Analytics Platform
 
-An end-to-end **Data Engineering & Analytics** project that ingests,
-validates, transforms, warehouses, and visualizes **2.24M+ U.S. flight
-records** using **Python, PostgreSQL, SQL, Pandas, Plotly, and
-Streamlit**.
+**End-to-End Data Engineering \| PostgreSQL Data Warehouse \| Streamlit
+Analytics \| Plotly Dashboards**
 
-![Python](https://img.shields.io/badge/Python-3.11+-blue)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-336791)
-![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-FF4B4B)
-![Plotly](https://img.shields.io/badge/Plotly-Visualization-3F4F75)
-
-------------------------------------------------------------------------
-
-# 🚀 Overview
-
-AeroStream is a complete flight operations analytics platform built on a
-modern data engineering workflow.
-
-It extracts raw aviation datasets, performs cleaning and validation,
-loads them into a PostgreSQL star-schema warehouse, and delivers
-interactive business intelligence through a multi-page Streamlit
-application.
-
-## Highlights
-
--   2.24M+ flight records
--   Python ETL pipeline
--   PostgreSQL Star Schema
--   Interactive Streamlit dashboard
--   Plotly visualizations
--   Airline, Airport & Weather analytics
+![Python](https://img.shields.io/badge/Python-3.11+-3776AB?logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?logo=postgresql&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?logo=plotly&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-Repository-black?logo=github)
+:::
 
 ------------------------------------------------------------------------
 
-# 🏗 Architecture
+## 🚀 Overview
 
-``` text
-Raw Data
-   │
-   ▼
-Ingestion
-   │
-   ▼
-Cleaning
-   │
-   ▼
-Validation
-   │
-   ▼
-PostgreSQL Warehouse
-   │
-   ▼
-Business SQL
-   │
-   ▼
-Streamlit Dashboard
+AeroStream is an end-to-end data engineering project that transforms raw
+U.S. flight operations data into a modern analytics platform.
+
+The project demonstrates the complete data lifecycle:
+
+-   Data ingestion
+-   Cleaning & transformation
+-   Data quality validation
+-   PostgreSQL star-schema warehouse
+-   Business SQL analytics
+-   Interactive Streamlit dashboards
+
+**Dataset Scale**
+
+  Metric                    Value
+  ------------------ ------------
+  Flight Records       2,240,464+
+  Fact Tables                   1
+  Dimension Tables              2
+  Dashboard Pages               4
+  Visualizations              15+
+
+------------------------------------------------------------------------
+
+# 🏗️ System Architecture
+
+``` mermaid
+flowchart LR
+
+A[Raw Flight Data]
+-->B[Ingestion]
+
+B-->C[Cleaning]
+
+C-->D[Validation]
+
+D-->E[PostgreSQL Data Warehouse]
+
+E-->F[Business SQL]
+
+F-->G[Streamlit Analytics]
+
+G-->H[Executive Dashboard]
+```
+
+------------------------------------------------------------------------
+
+# ⭐ Star Schema
+
+``` mermaid
+erDiagram
+
+FACT_FLIGHTS }o--|| DIM_AIRLINE : airline_id
+FACT_FLIGHTS }o--|| DIM_AIRPORT : dest_id
+
+FACT_FLIGHTS {
+    bigint date_id
+    int airline_id
+    int dest_id
+    float arr_delay
+    float dep_delay
+    boolean cancelled
+    float weather_delay
+    float carrier_delay
+    float nas_delay
+    float security_delay
+    float late_aircraft_delay
+    float distance
+}
+
+DIM_AIRLINE {
+    int airline_id
+    string airline_code
+    string airline_name
+}
+
+DIM_AIRPORT {
+    int airport_id
+    string airport_name
+    string city_name
+    string state_name
+    float latitude
+    float longitude
+}
 ```
 
 ------------------------------------------------------------------------
 
 # 📊 Dashboard Modules
 
-## Executive Dashboard
+## 🏠 Executive Dashboard
 
 -   Flight KPIs
 -   Delay Analysis
 -   Cancellation Rate
 -   Weather Impact
+-   USA Airport Operations Map
+-   Delay Cause Analysis
 -   Monthly Trends
--   USA Airport Map
 
-## Airline Analytics
-
--   Airline Rankings
--   Delay Analysis
--   Performance Table
-
-## Airport Analytics
-
--   Interactive USA Map
--   Airport KPIs
--   Leaderboards
--   Delay Distribution
-
-## Weather Analytics
-
--   Weather KPIs
--   Scatter Analysis
--   Weather Histograms
--   Most Affected Airlines
--   Most Affected Airports
+📸 **Screenshot:** `assets/dashboard.png`
 
 ------------------------------------------------------------------------
 
-# 🗄 Data Warehouse
+## ✈️ Airline Analytics
 
-**Fact Table** - fact_flights
+-   Airline Rankings
+-   Performance KPIs
+-   Delay Comparison
+-   Performance Leaderboard
+-   Airline Analytics Table
 
-**Dimension Tables** - dim_airline - dim_airport
+📸 **Screenshot:** `assets/airlines.png`
+
+------------------------------------------------------------------------
+
+## 🛫 Airport Analytics
+
+-   Interactive USA Airport Map
+-   Airport KPIs
+-   Airport Delay Distribution
+-   Busiest Airports
+-   Airport Leaderboard
+
+📸 **Screenshot:** `assets/airports.png`
+
+------------------------------------------------------------------------
+
+## 🌦 Weather Analytics
+
+-   Weather Impact KPIs
+-   Weather vs Arrival Delay
+-   Weather Distribution
+-   Airlines Most Affected
+-   Airports Most Affected
+
+📸 **Screenshot:** `assets/weather.png`
 
 ------------------------------------------------------------------------
 
 # 🛠 Tech Stack
 
-  Category          Technology
+  Layer             Technology
   ----------------- --------------
   Language          Python
-  Processing        Pandas
+  Data Processing   Pandas
   Database          PostgreSQL
   SQL               PostgreSQL
   ORM               SQLAlchemy
@@ -119,21 +173,11 @@ Streamlit Dashboard
 
 ------------------------------------------------------------------------
 
-# 📈 Dataset
-
-  Metric                    Value
-  ------------------ ------------
-  Flight Records       2,240,464+
-  Dashboard Pages               4
-  Fact Tables                   1
-  Dimension Tables              2
-
-------------------------------------------------------------------------
-
 # 📂 Project Structure
 
 ``` text
 AEROSTREAM/
+│
 ├── analytics/
 ├── cleaning/
 ├── ingestion/
@@ -142,46 +186,58 @@ AEROSTREAM/
 ├── weather/
 ├── utils/
 ├── streamlit_app/
+│   ├── app.py
+│   ├── pages/
+│   ├── utils/
+│   └── assets/
 ├── data/
-├── README.md
+├── main.py
 ├── requirements.txt
-└── main.py
+└── README.md
 ```
 
 ------------------------------------------------------------------------
 
-# ▶ Running
+# ▶️ Run Locally
 
 ``` bash
 git clone https://github.com/BAVAN188/AEROSTREAM.git
 cd AEROSTREAM
+
 python -m venv .venv
+
+# macOS / Linux
 source .venv/bin/activate
+
 pip install -r requirements.txt
+
 python main.py
+
 streamlit run streamlit_app/app.py
 ```
 
 ------------------------------------------------------------------------
 
-# 📸 Screenshots
+# 📈 Key Engineering Highlights
 
-Replace this section with screenshots of:
-
--   Executive Dashboard
--   Airline Analytics
--   Airport Analytics
--   Weather Analytics
+-   Modular ETL pipeline
+-   PostgreSQL warehouse using a star schema
+-   Business-focused SQL analytics
+-   Multi-page Streamlit application
+-   Geospatial airport analytics
+-   Weather impact analytics
+-   Interactive Plotly visualizations
 
 ------------------------------------------------------------------------
 
-# 🔮 Future Improvements
+# 🚀 Future Enhancements
 
--   Cloud PostgreSQL
+-   Cloud PostgreSQL (Neon)
+-   Streamlit Cloud deployment
 -   Docker
 -   Apache Airflow
 -   CI/CD
--   AWS Deployment
+-   AWS deployment
 
 ------------------------------------------------------------------------
 
@@ -191,4 +247,4 @@ Replace this section with screenshots of:
 
 GitHub: https://github.com/BAVAN188
 
-⭐ If you found this project useful, consider starring the repository.
+If you found this project useful, consider ⭐ starring the repository.
