@@ -17,4 +17,5 @@ logs/
 
 # macOS / Windows
 .DS_Store
-Thumbs.db
+Thumbs.db 
+streamlit_app/.streamlit/secrets.toml

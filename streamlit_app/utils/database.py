@@ -1,8 +1,8 @@
+import streamlit as st
 from sqlalchemy import create_engine
 import pandas as pd
-import streamlit as st
 
-DATABASE_URL = "postgresql://bavanbaskar@localhost:5432/AEROSTREAM1"
+DATABASE_URL = st.secrets["DATABASE_URL"]
 
 @st.cache_resource
 def get_engine():
